@@ -1,11 +1,11 @@
 #include <Keyboard.h>
-int led = 13;
-int buttonReset = 32; 
-bool skPress = false; //split key has not been pressed
+const int led = 13;
+const int buttonReset = 33; 
+bool hasRan = false; //split key has not been pressed
 
 void setup() {
   pinMode(led, OUTPUT); //sets up led for use
-  pinMode(buttonReset,INPUT_PULLUP);
+  pinMode(buttonReset, INPUT_PULLUP);
   Keyboard.begin(); //initialization of Keyboard function
 }
 
@@ -13,19 +13,22 @@ void loop() {
   float bareMin = 3.0; //minimum voltage to activate 
   int sensorValue = analogRead(A4); //stores analog read to variable
   float voltage = sensorValue * (3.3 / 1023.0); //converts ADC value to voltage
-
-  while (voltage > bareMin && skPress == false) {
+  
+  // if you press the button, you're allowed to use the program again
+  if (digitalRead(buttonReset) == HIGH) {
+    hasRan = false;   
+  
+} if (voltage > bareMin && !hasRan) {
     Keyboard.print("0"); //type split key of choice
-    delay(5);0+
-    digitalWrite(led, HIGH); // blink two times to confirm keystroke
-    delay(250);
-    digitalWrite(led, LOW);
-    delay(250); 
-    digitalWrite(led, HIGH);
-    delay(250); 
-    digitalWrite(led, LOW);
-    delay(100);
-    skPress = true; //split key has not been pressed, stop looking
+    delay(5);
+    hasRan = true; //split key has not been pressed, stop looking
 
-  } 
+} if (!hasRan) {
+    digitalWrite(led, HIGH);
+}   else {
+      digitalWrite(led, LOW);
 }
+}
+
+//to-do list
+//add failsafe for hitting reset switch while power is on
