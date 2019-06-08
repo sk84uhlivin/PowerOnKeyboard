@@ -1,34 +1,41 @@
 #include <Keyboard.h>
-const int led = 13;
-const int buttonReset = 33; 
-bool hasRan = false; //split key has not been pressed
+const int resetButton = 2; //Reset button on pin 2.
+const byte volCon = A1; //Controller voltage on pin A1.
+bool hasReset = false;
+bool hasPermission = true;
 
 void setup() {
-  pinMode(led, OUTPUT); //sets up led for use
-  pinMode(buttonReset, INPUT_PULLUP);
-  Keyboard.begin(); //initialization of Keyboard function
+  pinMode(LED_BUILTIN, OUTPUT); //Sets up built-in Arduino LED for use.
+  pinMode(resetButton, INPUT_PULLUP); //Sets up button for use w/ pullup resistor.
+  Keyboard.begin(); //Initialization of Keyboard function.
 }
 
 void loop() {
-  float bareMin = 3.0; //minimum voltage to activate 
-  int sensorValue = analogRead(A4); //stores analog read to variable
-  float voltage = sensorValue * (3.3 / 1023.0); //converts ADC value to voltage
+  float bareMin = 3.0; //Minimum voltage to activate Power On. 
+  int sensorValue = analogRead(volCon); //Reads voltage from A1 and stores integer to a variable.
+  float voltage = sensorValue * (3.3 / 1023.0); //Converts ADC value to voltage.
   
-  // if you press the button, you're allowed to use the program again
-  if (digitalRead(buttonReset) == HIGH) {
-    hasRan = false;   
-  
-} if (voltage > bareMin && !hasRan) {
-    Keyboard.print("0"); //type split key of choice
-    delay(5);
-    hasRan = true; //split key has not been pressed, stop looking
+  // Reset Key - Resets Power On function and activates Reset hotkey.
+  if (digitalRead(resetButton) == HIGH & hasReset) { //If the button is pressed...
+    Keyboard.print("9"); //...type reset key of choice.
+    delay(15);
+    hasReset = false; //Split key can be used again.
+    
+  // Permission to run on Power On
+} if (voltage < bareMin && !hasReset) { //If no voltage is present and reset key has been pushed...
+    hasPermission = true; //Power on may be used.
+    delay(50);
 
-} if (!hasRan) {
-    digitalWrite(led, HIGH);
+  // Power On
+} if (voltage > bareMin && hasPermission) {  //If voltage goes above 3V and reset key hasn't been pushed...
+    Keyboard.print("0"); //...type split key of choice
+    delay(15);
+    hasReset = true; //Split key has been pressed.
+    hasPermission = false; //Permission revoked.
+
+  // LED Indicator
+} if (hasPermission) { //If you have permission to use Power On...
+    digitalWrite(LED_BUILTIN, HIGH); //Power on the LED. Otherwise...
 }   else {
-      digitalWrite(led, LOW);
+      digitalWrite(LED_BUILTIN, LOW); } //Turn the LED off. 
 }
-}
-
-//to-do list
-//add failsafe for hitting reset switch while power is on
