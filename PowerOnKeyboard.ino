@@ -4,6 +4,9 @@ const byte volCon = A1; //Controller voltage on pin A1.
 bool hasReset = false;
 bool hasPermission = true;
 
+const byte splitKey = 0;
+const byte resetKey = 9;
+
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT); //Sets up built-in Arduino LED for use.
   pinMode(resetButton, INPUT_PULLUP); //Sets up button for use w/ pullup resistor.
@@ -17,7 +20,7 @@ void loop() {
   
   // Reset Key - Resets Power On function and activates Reset hotkey.
   if (digitalRead(resetButton) == HIGH & hasReset) { //If the button is pressed...
-    Keyboard.print("9"); //...type reset key of choice.
+    Keyboard.print(splitKey); //...type reset key of choice.
     delay(15);
     hasReset = false; //Split key can be used again.
     
@@ -28,7 +31,7 @@ void loop() {
 
   // Power On
 } if (voltage > bareMin && hasPermission) {  //If voltage goes above 3V and reset key hasn't been pushed...
-    Keyboard.print("0"); //...type split key of choice
+    Keyboard.print(resetKey); //...type split key of choice
     delay(15);
     hasReset = true; //Split key has been pressed.
     hasPermission = false; //Permission revoked.
